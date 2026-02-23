@@ -6,7 +6,9 @@ using Microsoft.OpenApi.Models;
 using WebApp.Data.Data;
 using WebApp.Data.Interfaces;
 using Elect.Job.Hangfire;
+using Hangfire;
 using WebApp.Data.Services;
+using WebApp.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +21,10 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 // ----- AutoMapper -----
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+
+// ----- Jobs -----
+builder.Services.AddScoped<SampleJob>();
+builder.Services.AddScoped<FacebookService>();
 
 // ----- Hangfire -----
 builder.Services.AddElectHangfire(builder.Configuration, "ElectHangfire");
@@ -87,5 +93,8 @@ app.UseStaticFiles();
 app.UseAuthorization();
 app.UseElectHangfire();
 app.MapControllers();
+
+// ----- Recurring Jobs -----
+RecurringJob.AddOrUpdate<SampleJob>("register-fb", job => job.Execute(), "*/5 * * * *");
 
 app.Run();
