@@ -1,14 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using Hangfire;
-using Microsoft.Extensions.Logging;
 
-namespace WebApp.Jobs;
+namespace WebApp.Features.Facebook;
 
-public class SampleJob(ILogger<SampleJob> logger, FacebookService facebook)
+public class SampleJob(ILogger<SampleJob> logger, IFacebookService facebook)
 {
     private readonly ILogger<SampleJob> _logger = logger;
-    private readonly FacebookService _facebook = facebook;
+    private readonly IFacebookService _facebook = facebook;
 
     [AutomaticRetry(Attempts = 3)]
     public async Task Execute()

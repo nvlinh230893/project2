@@ -1,8 +1,7 @@
 using AutoMapper;
-using WebApp.DTOs;
 using WebApp.Data.Models;
 
-namespace WebApp.Profiles;
+namespace WebApp.Features.Products;
 
 public class ProductProfile : Profile
 {

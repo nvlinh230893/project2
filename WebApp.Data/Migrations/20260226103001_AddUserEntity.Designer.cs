@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApp.Data.Data;
 
@@ -11,9 +12,11 @@ using WebApp.Data.Data;
 namespace WebApp.Data.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260226103001_AddUserEntity")]
+    partial class AddUserEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -133,28 +136,6 @@ namespace WebApp.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("User");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            CreatedTime = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            Email = "admin@webapp.com",
-                            GlobalId = new Guid("a1b2c3d4-0001-0000-0000-000000000001"),
-                            LastUpdatedTime = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            PasswordHash = "$2a$11$9ly0cGZ8Gd3rnbCbHYV6CO6KwfWszlLjTQ5CWnpXnNvypI1OxvKte",
-                            Username = "admin"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            CreatedTime = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            Email = "user@webapp.com",
-                            GlobalId = new Guid("a1b2c3d4-0002-0000-0000-000000000002"),
-                            LastUpdatedTime = new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
-                            PasswordHash = "$2a$11$9ly0cGZ8Gd3rnbCbHYV6CO6KwfWszlLjTQ5CWnpXnNvypI1OxvKte",
-                            Username = "user"
-                        });
                 });
 
             modelBuilder.Entity("WebApp.Data.Models.UserFBEntity", b =>

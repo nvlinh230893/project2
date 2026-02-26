@@ -1,4 +1,4 @@
-namespace WebApp.DTOs;
+namespace WebApp.Features.Products;
 
 public class ProductDto
 {

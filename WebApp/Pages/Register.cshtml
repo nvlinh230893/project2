@@ -1,0 +1,77 @@
+@page
+@{
+    ViewData["Title"] = "Register";
+}
+
+<div class="container" style="max-width: 420px; margin-top: 80px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-4">Register</h3>
+            <div id="alert" class="alert d-none"></div>
+            <form id="registerForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" required maxlength="100">
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required minlength="6">
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="submitBtn">Register</button>
+            </form>
+            <p class="text-center mt-3 mb-0">
+                Already have an account? <a href="/Login">Login</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alert = document.getElementById('alert');
+    const btn = document.getElementById('submitBtn');
+
+    alert.classList.add('d-none');
+    btn.disabled = true;
+    btn.textContent = 'Creating account...';
+
+    try {
+        const res = await fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('email').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert.className = 'alert alert-danger';
+            alert.textContent = data.message || 'Registration failed.';
+            alert.classList.remove('d-none');
+            return;
+        }
+
+        localStorage.setItem('jwt_token', data.token);
+        localStorage.setItem('username', data.username);
+        window.location.href = '/';
+    } catch {
+        alert.className = 'alert alert-danger';
+        alert.textContent = 'Network error. Please try again.';
+        alert.classList.remove('d-none');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Register';
+    }
+});
+</script>
+}

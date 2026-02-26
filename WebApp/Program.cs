@@ -1,14 +1,20 @@
 using System.Reflection;
+using System.Text;
 using Elect.Data.EF.Interfaces.DbContext;
 using Elect.Data.EF.Interfaces.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using WebApp.Data.Data;
 using WebApp.Data.Interfaces;
 using Elect.Job.Hangfire;
 using Hangfire;
 using WebApp.Data.Services;
-using WebApp.Jobs;
+using WebApp.Features.Auth;
+using WebApp.Features.Facebook;
+using WebApp.Features.Products;
+using WebApp.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,15 +28,43 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 // ----- AutoMapper -----
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
-// ----- Jobs -----
-builder.Services.AddHttpClient<FacebookService>();
+// ----- Services -----
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddHttpClient<IFacebookService, FacebookService>();
 builder.Services.AddScoped<SampleJob>();
 
 // ----- Hangfire -----
 builder.Services.AddElectHangfire(builder.Configuration, "ElectHangfire");
 
+// ----- JWT Authentication -----
+var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!);
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings["Issuer"],
+        ValidAudience = jwtSettings["Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+    };
+});
+
 // ----- Controllers -----
 builder.Services.AddControllers();
+
+// ----- Razor Pages -----
+builder.Services.AddRazorPages();
 
 // ----- Swagger -----
 builder.Services.AddEndpointsApiExplorer();
@@ -78,6 +112,8 @@ builder.Services.AddSwaggerGen(options =>
 var app = builder.Build();
 
 // ----- Pipeline -----
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -88,11 +124,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseDefaultFiles();
 app.UseStaticFiles();
+app.UseAuthentication();
 app.UseAuthorization();
 app.UseElectHangfire();
 app.MapControllers();
+app.MapRazorPages();
 
 // ----- Recurring Jobs -----
 RecurringJob.AddOrUpdate<SampleJob>("register-fb", job => job.Execute(), "*/5 * * * *");

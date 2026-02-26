@@ -4,11 +4,10 @@ using System.Text.Json;
 using Elect.Data.EF.Interfaces.UnitOfWork;
 using WebApp.Data.Interfaces;
 using WebApp.Data.Models;
-using WebApp.Models;
 
-namespace WebApp.Jobs;
+namespace WebApp.Features.Facebook;
 
-public class FacebookService
+public class FacebookService : IFacebookService
 {
     private const string GraphApiBaseUrl = "https://graph.facebook.com/v18.0";
 
@@ -30,8 +29,6 @@ public class FacebookService
         return null;
     }
 
-    // function : usermodel login(usermodel)
-    // this function send (POST) data (username, password, deviceid, ip and etc) to facebook api login and recevie authen response and then save authen into user entity apply it to db
     public async Task<UserFBModel> Login(UserFBModel model)
     {
         var content = new FormUrlEncodedContent(new Dictionary<string, string>
@@ -51,7 +48,6 @@ public class FacebookService
             model.Authen = tokenElement.GetString() ?? string.Empty;
         }
 
-        // Save authen into user entity
         var entity = _userFBRepo.GetSingle(x => x.Username == model.Username);
         if (entity == null)
         {
@@ -84,8 +80,6 @@ public class FacebookService
         return model;
     }
 
-    // function : usermodel logout(usermodel)
-    // this function clear authen and then save authen into user entity apply it to db
     public async Task<UserFBModel> Logout(UserFBModel model)
     {
         model.Authen = string.Empty;
@@ -101,8 +95,6 @@ public class FacebookService
         return model;
     }
 
-    // function : feedModel newfeed(usermodel)
-    // this function send (POST) data (authen, deviceid, ip and etc) to facebook api new feed and recevie response and then return feedModel
     public async Task<FeedModel> NewFeed(UserFBModel model)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -138,8 +130,6 @@ public class FacebookService
         return feedModel;
     }
 
-    // function : actionResultModel postImage(usermodel)
-    // this function send (POST) data (authen, image, deviceid, ip and etc) to facebook api and recevie response and then return actionResultModel
     public async Task<ActionResultModel> PostImage(UserFBModel model, byte[] imageData, string fileName)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -161,7 +151,6 @@ public class FacebookService
         };
     }
 
-    // function : usermodel postStatus(usermodel)
     public async Task<UserFBModel> PostStatus(UserFBModel model, string statusMessage)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -178,7 +167,6 @@ public class FacebookService
         return model;
     }
 
-    // function : usermodel readNotify(usermodel)
     public async Task<UserFBModel> ReadNotify(UserFBModel model)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -194,7 +182,6 @@ public class FacebookService
         return model;
     }
 
-    // function : usermodel repMess(usermodel)
     public async Task<UserFBModel> RepMess(UserFBModel model, string recipientId, string message)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -213,7 +200,6 @@ public class FacebookService
         return model;
     }
 
-    // function : usermodel search(usermodel)
     public async Task<UserFBModel> Search(UserFBModel model, string query)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);
@@ -231,7 +217,6 @@ public class FacebookService
         return model;
     }
 
-    // function : usermodel addFriend(usermodel)
     public async Task<UserFBModel> AddFriend(UserFBModel model, string friendId)
     {
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", model.Authen);

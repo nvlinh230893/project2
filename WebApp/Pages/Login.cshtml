@@ -1,0 +1,72 @@
+@page
+@{
+    ViewData["Title"] = "Login";
+}
+
+<div class="container" style="max-width: 420px; margin-top: 80px;">
+    <div class="card shadow-sm">
+        <div class="card-body p-4">
+            <h3 class="card-title text-center mb-4">Login</h3>
+            <div id="alert" class="alert d-none"></div>
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" required autofocus>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100" id="submitBtn">Login</button>
+            </form>
+            <p class="text-center mt-3 mb-0">
+                Don't have an account? <a href="/Register">Register</a>
+            </p>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alert = document.getElementById('alert');
+    const btn = document.getElementById('submitBtn');
+
+    alert.classList.add('d-none');
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+
+    try {
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value
+            })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+            alert.className = 'alert alert-danger';
+            alert.textContent = data.message || 'Login failed.';
+            alert.classList.remove('d-none');
+            return;
+        }
+
+        localStorage.setItem('jwt_token', data.token);
+        localStorage.setItem('username', data.username);
+        window.location.href = '/';
+    } catch {
+        alert.className = 'alert alert-danger';
+        alert.textContent = 'Network error. Please try again.';
+        alert.classList.remove('d-none');
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Login';
+    }
+});
+</script>
+}
