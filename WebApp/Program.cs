@@ -23,8 +23,8 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
 // ----- Jobs -----
+builder.Services.AddHttpClient<FacebookService>();
 builder.Services.AddScoped<SampleJob>();
-builder.Services.AddScoped<FacebookService>();
 
 // ----- Hangfire -----
 builder.Services.AddElectHangfire(builder.Configuration, "ElectHangfire");

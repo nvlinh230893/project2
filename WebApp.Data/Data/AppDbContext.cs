@@ -12,6 +12,7 @@ public class AppDbContext : Elect.Data.EF.Services.DbContext.DbContext
     }
 
     public DbSet<ProductEntity> Products => Set<ProductEntity>();
+    public DbSet<UserFBEntity> UserFBs => Set<UserFBEntity>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
